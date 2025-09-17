@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tap Tap — Telegram Mini App Starter</title>
+  <style>
+    :root{
+      --bg:#0f172a;          /* fallback bg (slate-900) */
+      --fg:#e5e7eb;          /* fallback text (gray-200) */
+      --muted:#94a3b8;       /* gray-400 */
+      --button:#22c55e;      /* green-500 */
+      --button-text:#0b1720; /* dark */
+      --card:#111827;        /* gray-900 */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display:flex; align-items:center; justify-content:center; padding:16px;
+    }
+    .app{
+      width:100%; max-width:420px; background:var(--card); border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    h1{font-size:22px; margin:0 0 6px}
+    .sub{color:var(--muted); font-size:14px; margin-bottom:16px}
+    .counter{
+      display:flex; align-items:center; justify-content:center; gap:12px; margin:18px 0 8px
+    }
+    .count{
+      font-size:56px; font-weight:800; letter-spacing:1px;
+    }
+    .row{display:flex; gap:12px; margin-top:12px}
+    button{
+      flex:1; appearance:none; border:0; border-radius:14px; padding:14px 16px; font-weight:700; font-size:16px; cursor:pointer;
+      background:var(--button); color:var(--button-text); transition:transform .05s ease; outline:none;
+    }
+    button:active{ transform: scale(.985) }
+    .ghost{ background:transparent; color:var(--fg); border:1px solid rgba(255,255,255,.12) }
+    .tiny{ font-size:12px; margin-top:10px; color:var(--muted); text-align:center }
+    .warn{ color:#fca5a5 }
+  </style>
+  <!-- Telegram Web App SDK (safe to include even outside Telegram; it won't crash if not available) -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <main class="app">
+    <h1>Tap Tap <span aria-hidden="true">👆</span></h1>
+    <div class="sub">Tek tıkla sayaç artır. <b>Veri yerelde saklanır</b> (başlangıç).</div>
+
+    <section class="counter">
+      <div id="count" class="count">0</div>
+    </section>
+
+    <div class="row">
+      <button id="tapBtn">TIKLA</button>
+      <button id="resetBtn" class="ghost">SIFIRLA</button>
+    </div>
+
+    <div class="row">
+      <button id="shareBtn" class="ghost">PAYLAŞ</button>
+    </div>
+
+    <div id="env" class="tiny"></div>
+    <div id="hint" class="tiny"></div>
+  </main>
+
+  <script>
+    // Helper: read & write local count
+    const readCount = () => parseInt(localStorage.getItem('tap_count') || '0', 10);
+    const writeCount = (v) => localStorage.setItem('tap_count', String(v));
+
+    const $count = document.getElementById('count');
+    const $tap = document.getElementById('tapBtn');
+    const $reset = document.getElementById('resetBtn');
+    const $share = document.getElementById('shareBtn');
+    const $env = document.getElementById('env');
+    const $hint = document.getElementById('hint');
+
+    // Access Telegram SDK if present
+    const tg = window.Telegram && Telegram.WebApp ? Telegram.WebApp : null;
+
+    function syncThemeFromTelegram(){
+      if(!tg) return;
+      const p = tg.themeParams || {};
+      const css = document.documentElement.style;
+      if(p.bg_color) css.setProperty('--bg', p.bg_color);
+      if(p.text_color) css.setProperty('--fg', p.text_color);
+      if(p.hint_color) css.setProperty('--muted', p.hint_color);
+      if(p.button_color) css.setProperty('--button', p.button_color);
+      if(p.button_text_color) css.setProperty('--button-text', p.button_text_color);
+      if(p.secondary_bg_color) css.setProperty('--card', p.secondary_bg_color);
+      // Optional header tint
+      try{ tg.setHeaderColor('secondary_bg_color'); }catch(e){}
+    }
+
+    function vibrate(pattern){
+      if(tg && tg.HapticFeedback){
+        tg.HapticFeedback.impactOccurred('light');
+      } else if (navigator.vibrate){
+        navigator.vibrate(pattern || 10);
+      }
+    }
+
+    function render(){
+      $count.textContent = String(readCount());
+    }
+
+    function increment(){
+      const v = readCount() + 1;
+      writeCount(v); render(); vibrate(8);
+    }
+
+    function reset(){ writeCount(0); render(); vibrate(15); }
+
+    function share(){
+      const v = readCount();
+      const txt = `Ben Telegram Mini App’imde ${v} kez tıkladım!`; 
+      const url = 'https://t.me/share/url?text=' + encodeURIComponent(txt);
+      if(tg){ tg.openTelegramLink(url); } else { window.open(url, '_blank'); }
+    }
+
+    // Init on load
+    (function init(){
+      render();
+      $tap.addEventListener('click', increment);
+      $reset.addEventListener('click', reset);
+      $share.addEventListener('click', share);
+
+      if(tg){
+        tg.ready();
+        tg.expand();
+        syncThemeFromTelegram();
+        tg.onEvent('themeChanged', syncThemeFromTelegram);
+        tg.MainButton.setText('SIFIRLA');
+        tg.MainButton.onClick(reset);
+        tg.MainButton.show();
+        const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+        if(sp) $hint.innerHTML = `Start param: <code>${sp}</code>`;
+        $env.textContent = 'Telegram içinden çalışıyor.';
+      } else {
+        $env.innerHTML = 'Telegram dışında çalışıyorsun. <span class="warn">(Test Modu)</span>';
+        $hint.textContent = 'Bu sayfayı Telegram’da bot menü butonundan açınca tam özellikler aktif olur.';
+      }
+    })();
+  </script>
+</body>
+</html>
