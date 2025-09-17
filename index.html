@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMW Mini — 5 Sekmeli</title>
+  <link rel="stylesheet" href="styles/app.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <main class="app">
+      <header>
+        <div>
+          <div class="title" id="hdrTitle">Madencilik</div>
+          <div class="subtitle" id="hdrSub">Günlük basit tıklama ile coin topla.</div>
+        </div>
+      </header>
+
+      <!-- CÜZDAN -->
+      <section id="screen-wallet" class="screen">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Cüzdan</h3>
+          <div class="subtitle">Toplam bakiyen ve son hareketler.</div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px">
+            <div style="font-size:14px; color:var(--muted)">Bakiye</div>
+            <div style="font-size:28px; font-weight:900" id="balance">0</div>
+          </div>
+        </div>
+        <div class="list" id="txList" aria-label="İşlem geçmişi"></div>
+        <div class="tiny">(Şimdilik cihazında saklanır.)</div>
+      </section>
+
+      <!-- LİDERLİK -->
+      <section id="screen-leaderboard" class="screen">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Liderlik</h3>
+          <div class="subtitle">Global tablo yakında. Şimdilik örnek sıralama.</div>
+        </div>
+        <div class="list" id="lbList"></div>
+      </section>
+
+      <!-- MADENCİLİK -->
+      <section id="screen-mining" class="screen active">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Tap Tap 👆</h3>
+          <div class="subtitle">Tek tıkla sayaç artır. <b>Veri yerelde</b> (başlangıç).</div>
+          <div class="counter"><div id="count" class="count">0</div></div>
+          <div class="row">
+            <button id="tapBtn">TIKLA</button>
+            <button id="resetBtn" class="ghost">SIFIRLA</button>
+          </div>
+          <div class="row">
+            <button id="shareBtn" class="ghost">PAYLAŞ</button>
+          </div>
+        </div>
+        <div id="env" class="tiny"></div>
+        <div id="hint" class="tiny"></div>
+      </section>
+
+      <!-- OYUNLAR -->
+      <section id="screen-games" class="screen">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Mini Oyunlar</h3>
+          <div class="subtitle">Yakında küçük dokunmatik oyunlar eklenecek.</div>
+        </div>
+        <div class="list">
+          <div class="item"><span>Günlük Çark</span><span class="subtitle">yakında</span></div>
+          <div class="item"><span>30 dk Lootbox</span><span class="subtitle">yakında</span></div>
+        </div>
+      </section>
+
+      <!-- PROFİL -->
+      <section id="screen-profile" class="screen">
+        <div class="card">
+          <h3 style="margin:0 0 6px">Profil</h3>
+          <div id="userBox" class="subtitle">Kullanıcı bilgileri yükleniyor…</div>
+        </div>
+        <div class="row">
+          <button id="exportBtn" class="ghost">VERİYİ DIŞA AKTAR</button>
+          <button id="wipeBtn" class="ghost">HEPSİNİ SIFIRLA</button>
+        </div>
+        <div class="tiny">Tema Telegram’dan otomatik eşitlenir.</div>
+      </section>
+
+      <!-- TABBAR -->
+      <nav class="tabbar">
+        <div class="tabs">
+          <div class="tabs-inner">
+            <button class="tab" data-tab="wallet" aria-selected="false"><div class="ico">🪙</div><div>Cüzdan</div></button>
+            <button class="tab" data-tab="leaderboard" aria-selected="false"><div class="ico">🏆</div><div>Liderlik</div></button>
+            <button class="tab" data-tab="mining" aria-selected="true"><div class="ico">⛏️</div><div>Madencilik</div></button>
+            <button class="tab" data-tab="games" aria-selected="false"><div class="ico">🎮</div><div>Oyunlar</div></button>
+            <button class="tab" data-tab="profile" aria-selected="false"><div class="ico">👤</div><div>Profil</div></button>
+          </div>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <!-- Tüm JS artık modüler -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
